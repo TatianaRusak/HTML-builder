@@ -38,38 +38,6 @@ rl.on('line', data => {
   );
 });
 
-
-
-// -------- ВАРИАНТ 2 -------------
-
-// fs.writeFile(
-//   pathForYournotes,
-//   '',
-//   err => {
-//     if (err) {
-//       throw err.message;
-//       // }
-//       // else {
-//       //   stdout.write('Что мне записать в файл?\n');
-//       // }
-//     }
-//   }
-// );
-// stdin.on('data', data => {
-//   if (data.toString().trim() === 'exit') {
-//     process.exit();
-//   };
-
-//   fs.appendFile(
-//     pathForYournotes,
-//     data,
-//     err => {
-//       if (err) { throw err; }
-//       stdout.write('Записал. Что-то еще?\n');
-//     }
-//   );
-// });
-
 process.on('SIGINT', () => {
   process.exit();
 });
