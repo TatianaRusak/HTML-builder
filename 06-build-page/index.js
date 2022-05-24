@@ -40,13 +40,18 @@ async function copyDir(pathToOrigDir, pathToCopyDir) {
       let pathTo = path.join(__dirname, 'project-dist', 'assets', file.name);
 
       if (stats.isFile()) {
+        fs.mkdir(pathToCopyDir, { recursive: true }, err => { 
+          if (err) {
+            throw err;
+          }
+        });
         fs.copyFile(pathFrom, path.join(pathToCopyDir, file.name), (err) => {
           if (err) {
             throw err;
           }
         });
-      } else { 
-        makeDir(pathTo);
+      } else {
+        makeDir(pathTo); //Create dir in case not found  
         copyDir(pathFrom, pathTo);
       }
     });
