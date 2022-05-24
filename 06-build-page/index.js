@@ -70,6 +70,15 @@ async function createCssBundel() {
       .filter(item => path.extname(item.name) === '.css')
       .map(item => item.name);
     
+    fs.access(pathToBundle, (err) => {
+      if (err) {
+        return
+      }
+      fs.truncate(pathToBundle, err => {
+        if(err) throw err; // не удалось очистить файл
+      });
+    });
+    
     files.forEach((file) => {
       const readStream = fs.createReadStream(path.join(pathToDir, file), 'utf-8');
       readStream.on('data', (chunk) => {
