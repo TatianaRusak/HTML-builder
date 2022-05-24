@@ -17,18 +17,7 @@ async function makeDir(path) {
   });
 }
 
-  // fs.access(path, function (err) {
-  //   if (err && err.code === 'ENOENT') {
-  //     fs.mkdir(path, {recursive: true}, (err) => { // создать папку, если такой еще нет
-  //       if (err) {
-  //         throw err;
-  //       }
-  //     });
-  //   }
-  // });
-
 const pathToProject = path.join(__dirname, 'project-dist');
-// makeDir(pathToProject);
 
 
 // -------- копируем  assets в  project-dist ---------------
@@ -68,8 +57,6 @@ async function copyDir(pathToOrigDir, pathToCopyDir) {
   });
 }
 
-// copyDir(pathToAssetsFromDir, pathToAssetsToDir);
-
 
 // -------- создание файла style.css  ---------------
 
@@ -100,45 +87,41 @@ async function createCssBundel() {
   }
 }
 
-// createCssBundel();
-
 
 // --------------- собираем html ---------
 
 const pathToTemplate = path.join(__dirname, 'template.html');
+const pathToComponents = path.join(__dirname, 'components');
 
-function createHTMLbundel () {
-  try {
-    fs.readFile(pathToTemplate, 'utf8', (error, templateData) => {
-      if(error) throw error; // ошибка чтения файла, если есть
-       
-      const arrOfTemplTags = templateData.match(/\{\{\w+\}\}/g);  // поиск шаблонных тегов
 
-      arrOfTemplTags.forEach(item => { 
-        let pathToComponent = path.join(__dirname, 'components', `${item.substring(2, item.length - 2)}.html`);
+async function createHTMLbundel() { 
+  fs.readFile(pathToTemplate, 'utf8', (error, templateData) => {
+    if (error) throw error; // ошибка чтения файла, если есть
 
-        fs.readFile(pathToComponent, 'utf8', (error, currentComponent) => {
-          if (error) throw error; // ошибка чтения файла, если есть
+    (async () => { 
+      const components = await readdir(pathToComponents, { withFileTypes: true });
+      components.forEach(componentItem => { 
+        let extansion = path.extname(componentItem.name);
+        let componentName = path.basename(componentItem.name, extansion);
+        // let componentName = componentItem.name.substring(0, componentItem.name.indexOf('.'));
 
-          templateData = templateData.replace(item, currentComponent);
-
-          // console.log(templateData + '----------------------------------------')
-
-          fs.writeFile('06-build-page/project-dist/index.html', templateData, (error) => {
-            if(error) throw error; // ошибка чтения файла, если есть
-          });
+        let stream = fs.createReadStream(path.join(pathToComponents, `${componentName}.html`));
+        let componentData = '';
+        stream.on('data', chunk => componentData += chunk);
+        stream.on('end', () => {
+          templateData = templateData.replace(`{{${componentName}}}`, componentData);
+          let htmlFile = fs.createWriteStream(path.join(pathToProject, 'index.html'));
+          htmlFile.write(templateData);
         });
       });
-    });
-  } catch (err) {
-    console.error(err);
-  }
+    })();
+  });
 }
-// createHTMLbundel();
+
 
 (async () => {
   await makeDir(pathToProject);
-  createHTMLbundel();
-  createCssBundel();
   await copyDir(pathToAssetsFromDir, pathToAssetsToDir);
+  await createHTMLbundel();
+  await createCssBundel();
 })();
