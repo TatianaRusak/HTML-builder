@@ -17,8 +17,18 @@ async function makeDir(path) {
   });
 }
 
+  // fs.access(path, function (err) {
+  //   if (err && err.code === 'ENOENT') {
+  //     fs.mkdir(path, {recursive: true}, (err) => { // создать папку, если такой еще нет
+  //       if (err) {
+  //         throw err;
+  //       }
+  //     });
+  //   }
+  // });
+
 const pathToProject = path.join(__dirname, 'project-dist');
-makeDir(pathToProject);
+// makeDir(pathToProject);
 
 
 // -------- копируем  assets в  project-dist ---------------
@@ -58,7 +68,7 @@ async function copyDir(pathToOrigDir, pathToCopyDir) {
   });
 }
 
-copyDir(pathToAssetsFromDir, pathToAssetsToDir);
+// copyDir(pathToAssetsFromDir, pathToAssetsToDir);
 
 
 // -------- создание файла style.css  ---------------
@@ -90,16 +100,16 @@ async function createCssBundel() {
   }
 }
 
-createCssBundel();
+// createCssBundel();
 
 
 // --------------- собираем html ---------
 
 const pathToTemplate = path.join(__dirname, 'template.html');
 
-async function createHTMLbundel () {
-  try { 
-    await fs.readFile(pathToTemplate, 'utf8', (error, templateData) => {
+function createHTMLbundel () {
+  try {
+    fs.readFile(pathToTemplate, 'utf8', (error, templateData) => {
       if(error) throw error; // ошибка чтения файла, если есть
        
       const arrOfTemplTags = templateData.match(/\{\{\w+\}\}/g);  // поиск шаблонных тегов
@@ -124,4 +134,11 @@ async function createHTMLbundel () {
     console.error(err);
   }
 }
-createHTMLbundel();
+// createHTMLbundel();
+
+(async () => {
+  await makeDir(pathToProject);
+  createHTMLbundel();
+  createCssBundel();
+  await copyDir(pathToAssetsFromDir, pathToAssetsToDir);
+})();
